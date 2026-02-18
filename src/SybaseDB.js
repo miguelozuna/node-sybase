@@ -15,7 +15,7 @@ function Sybase(host, port, dbname, username, password, logTiming, pathToJavaBri
     this.logTiming = (logTiming == true);
     this.encoding = encoding;
     this.extraLogs = extraLogs;
-+    this.orphanResponses = 0;
+    this.orphanResponses = 0;
     
     this.pathToJavaBridge = pathToJavaBridge;
     if (this.pathToJavaBridge === undefined)
