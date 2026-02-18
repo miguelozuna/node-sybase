@@ -134,6 +134,9 @@ Sybase.prototype.onSQLResponse = function(jsonMsg)
         console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
 
     request.callback(err, result);
+};
+
+Sybase.prototype.onSQLError = function(data)
 {
 	var error = new Error(data);
 
