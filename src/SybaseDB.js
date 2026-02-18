@@ -107,8 +107,8 @@ Sybase.prototype.query = function(sql, callback)
 Sybase.prototype.onSQLResponse = function(jsonMsg)
 {
     var err = null;
-	var request = this.currentMessages[jsonMsg.msgId];
-	delete this.currentMessages[jsonMsg.msgId];
+    var request = this.currentMessages[jsonMsg.msgId];
+    delete this.currentMessages[jsonMsg.msgId];
 
     if (!request) {
         this.orphanResponses = (this.orphanResponses || 0) + 1;
@@ -118,14 +118,22 @@ Sybase.prototype.onSQLResponse = function(jsonMsg)
         return;
     }
 
-	var result = jsonMsg.result;
+    var result = jsonMsg.result;
+    if (result && result.length === 1)
+        result = result[0];
 
-	if (this.logTiming)
-		console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
-	request.callback(err, result);
-};
+    var currentTime = (new Date()).getTime();
+    var sendTimeMS = currentTime - jsonMsg.javaEndTime;
+    hrend = process.hrtime(request.hrstart);
+    var javaDuration = (jsonMsg.javaEndTime - jsonMsg.javaStartTime);
 
-Sybase.prototype.onSQLError = function(data)
+    if (jsonMsg.error !== undefined)
+        err = new Error(jsonMsg.error);
+
+    if (this.logTiming)
+        console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
+
+    request.callback(err, result);
 {
 	var error = new Error(data);
 
