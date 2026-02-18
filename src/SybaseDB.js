@@ -15,6 +15,7 @@ function Sybase(host, port, dbname, username, password, logTiming, pathToJavaBri
     this.logTiming = (logTiming == true);
     this.encoding = encoding;
     this.extraLogs = extraLogs;
++    this.orphanResponses = 0;
     
     this.pathToJavaBridge = pathToJavaBridge;
     if (this.pathToJavaBridge === undefined)
@@ -109,7 +110,13 @@ Sybase.prototype.onSQLResponse = function(jsonMsg)
 	var request = this.currentMessages[jsonMsg.msgId];
 	delete this.currentMessages[jsonMsg.msgId];
 
-	var result = jsonMsg.result;
+    if (!request) {
+        this.orphanResponses = (this.orphanResponses || 0) + 1;
+        if (this.extraLogs) {
+            console.debug('No matching request for msgId', jsonMsg.msgId, '- ignoring response');
+        }
+        return;
+    }
 	if (result.length === 1)
 		result = result[0]; //if there is only one just return the first RS not a set of RS's
 
@@ -139,10 +146,17 @@ Sybase.prototype.onSQLError = function(data)
 	}
 
     // clear the current messages before calling back with the error.
-    this.currentMessages = [];
+    this.currentMessages = {};
     callBackFuncitons.forEach(function(cb) {
         cb(error);
     });
 };
 
 module.exports = Sybase;
+
+// simple metrics helper
+Sybase.prototype.getMetrics = function() {
+    return {
+        orphanResponses: this.orphanResponses || 0
+    };
+};
