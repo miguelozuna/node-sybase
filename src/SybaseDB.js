@@ -117,17 +117,8 @@ Sybase.prototype.onSQLResponse = function(jsonMsg)
         }
         return;
     }
-	if (result.length === 1)
-		result = result[0]; //if there is only one just return the first RS not a set of RS's
 
-	var currentTime = (new Date()).getTime();
-	var sendTimeMS = currentTime - jsonMsg.javaEndTime;
-	hrend = process.hrtime(request.hrstart);
-	var javaDuration = (jsonMsg.javaEndTime - jsonMsg.javaStartTime);
-
-    if (jsonMsg.error !== undefined)
-        err = new Error(jsonMsg.error);
-
+	var result = jsonMsg.result;
 
 	if (this.logTiming)
 		console.log("Execution time (hr): %ds %dms dbTime: %dms dbSendTime: %d sql=%s", hrend[0], hrend[1]/1000000, javaDuration, sendTimeMS, request.sql);
